@@ -1,0 +1,5 @@
+administradorDisco\DiskManager.class
+nucleo\SuperBlock.class
+nucleo\MapaDeBits.class
+com\mycompany\py3\gestordearchivos\PY3GestorDeArchivos.class
+nucleo\Inode.class

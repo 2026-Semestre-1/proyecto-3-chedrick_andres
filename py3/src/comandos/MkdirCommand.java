@@ -1,6 +1,5 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package comandos;
 
@@ -12,15 +11,28 @@ import java.io.IOException;
  *
  * @author joses
  */
-public class DirCommands {
+public class MkdirCommand implements Command {
 
     private FileSystem fs;
+    private ShellState state;
 
-    public DirCommands(FileSystem fs) {
+    public MkdirCommand(FileSystem fs, ShellState state) {
         this.fs = fs;
+        this.state = state;
     }
-    //makdir
-    public void mkdir(String name, int parentId, int ownerId, int groupId) {
+
+    @Override
+    public void execute(String[] args) {
+        if (args.length < 2) {
+            System.out.println("Uso: mkdir nombre");
+            return;
+        }
+
+        String name = args[1];
+        int parentId = state.currentDirId;
+        int ownerId = 0;
+        int groupId = 0;
+
         try {
             if (fs.superblock.freeInodes <= 0) {
                 System.out.println("Error: no hay espacio para más archivos/directorios");
@@ -72,57 +84,6 @@ public class DirCommands {
 
         } catch (IOException e) {
             System.out.println("Error al crear directorio: " + e.getMessage());
-        }
-    }
-   // ===== Comando ls =====
-    public void ls(int dirId, boolean recursive) {
-        Inode dir = fs.inodeTable[dirId];
-
-        if (dir == null || !dir.type.equals(Inode.DIR)) {
-            System.out.println("Error: directorio no válido");
-            return;
-        }
-
-        if (recursive) {
-            lsRecursivo(dirId, 0);
-        } else {
-            lsSimple(dirId);
-        }
-    }
-
-    // ls sin -R: solo el nivel actual
-    private void lsSimple(int dirId) {
-        Inode dir = fs.inodeTable[dirId];
-
-        if (dir.childCount == 0) {
-            System.out.println("(directorio vacío)");
-            return;
-        }
-
-        for (int i = 0; i < dir.childCount; i++) {
-            Inode child = fs.inodeTable[dir.children[i]];
-            if (child == null) continue;
-
-            String tipo = child.type.equals(Inode.DIR) ? "[D]" : "[F]";
-            System.out.println(tipo + "  " + child.getFullName());
-        }
-    }
-
-    // ls -R: entra a cada subdirectorio también
-    private void lsRecursivo(int dirId, int depth) {
-        Inode dir = fs.inodeTable[dirId];
-        String indent = "  ".repeat(depth);
-
-        for (int i = 0; i < dir.childCount; i++) {
-            Inode child = fs.inodeTable[dir.children[i]];
-            if (child == null) continue;
-
-            String tipo = child.type.equals(Inode.DIR) ? "[D]" : "[F]";
-            System.out.println(indent + tipo + "  " + child.getFullName());
-
-            if (child.type.equals(Inode.DIR)) {
-                lsRecursivo(child.id, depth + 1);
-            }
         }
     }
 }

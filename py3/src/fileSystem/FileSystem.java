@@ -3,19 +3,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package fileSystem;
+
 import nucleo.SuperBlock;
 import nucleo.MapaDeBits;
 import nucleo.Inode;
 import administradorDisco.DiskManager;
-import comandos.DirCommands;
 import java.io.IOException;
 import java.util.Scanner;
-import comandos.FileCommands;
-
-/**
- *
- * @author joses
- */
 
 /**
  *
@@ -27,17 +21,11 @@ public class FileSystem {
     public MapaDeBits bitmap;
     public Inode[] inodeTable;
     public DiskManager diskManager;
-    public static final int INODE_SIZE = 1024; // bytes reservados por inodo en disco
-    public FileCommands fileCommands;
-    public DirCommands dirCommands;
+    public static final int INODE_SIZE = 1024;
+
     public FileSystem() {
-        dirCommands = new DirCommands(this);
-        fileCommands = new FileCommands(this);
-         
     }
-    
-    //Comando format 
-    //  format 10 512 miDiscoDuro.fs
+
     public void format(int diskMB, int blockSize, String filename) {
         try {
             long diskSizeBytes = (long) diskMB * 1024 * 1024;
@@ -46,26 +34,20 @@ public class FileSystem {
             System.out.println("Tamaño solicitado: " + diskMB + " MB");
             System.out.println("Tamaño de bloque:  " + blockSize + " bytes");
 
-            //SuperBlock en memoria
             superblock = new SuperBlock();
             superblock.init("miFS", diskSizeBytes, blockSize, filename);
 
-            // todos los bloques libres
             bitmap = new MapaDeBits(superblock.totalBlocks);
 
-            //  tabla de inodos vacia
             inodeTable = new Inode[superblock.maxInodes];
 
-            // archivo físico .fs
             diskManager = new DiskManager(filename);
             diskManager.createDisk(diskSizeBytes);
             diskManager.openDisk();
 
-            // SuperBlock y el Bitmap al disco
             diskManager.writeSuperBlock(superblock);
             diskManager.writeBitmap(bitmap, superblock.bitmapOffset);
 
-            // ->  Le pedimos password de root y lo crea
             Scanner sc = new Scanner(System.in);
             System.out.print("Defina password para root: ");
             String password = sc.nextLine();
@@ -77,28 +59,25 @@ public class FileSystem {
                 return;
             }
 
-            
             Inode root = new Inode();
-            root.init(0, "/", Inode.DIR, 0, 0, -1); // id=0, owner=root(0), grupo root(0), sin padre
+            root.init(0, "/", Inode.DIR, 0, 0, -1);
             root.ownerPerm = 7;
             root.groupPerm = 5;
             inodeTable[0] = root;
 
             Inode homeRoot = new Inode();
-            homeRoot.init(1, "root", Inode.DIR, 0, 0, 0); // id=1, padre=0 (la raíz)
+            homeRoot.init(1, "root", Inode.DIR, 0, 0, 0);
             homeRoot.ownerPerm = 7;
             homeRoot.groupPerm = 0;
             inodeTable[1] = homeRoot;
             root.addChild(1);
 
-            superblock.inodeUsed(); // por la raíz
-            superblock.inodeUsed(); // por /root
+            superblock.inodeUsed();
+            superblock.inodeUsed();
 
-         
             diskManager.writeInode(root, superblock.inodeTableOffset, INODE_SIZE);
             diskManager.writeInode(homeRoot, superblock.inodeTableOffset, INODE_SIZE);
 
-          
             diskManager.writeSuperBlock(superblock);
 
             System.out.println();
@@ -110,18 +89,19 @@ public class FileSystem {
             System.out.println("Error al formatear el disco: " + e.getMessage());
         }
     }
-    
-     //Comnados
-    public void mkdir(String name, int parentId, int ownerId, int groupId) {
-        dirCommands.mkdir(name, parentId, ownerId, groupId);
+
+    public int buscarInodePorNombre(String name, int dirId) {
+        Inode dir = inodeTable[dirId];
+        if (dir == null || !dir.type.equals(Inode.DIR)) {
+            return -1;
+        }
+
+        for (int i = 0; i < dir.childCount; i++) {
+            Inode child = inodeTable[dir.children[i]];
+            if (child != null && child.getFullName().equals(name)) {
+                return child.id;
+            }
+        }
+        return -1;
     }
-    
-    public void touch(String name, int parentId, int ownerId, int groupId) {
-        fileCommands.touch(name, parentId, ownerId, groupId);
-    }
-    
-    public void ls(int dirId, boolean recursive) {
-        dirCommands.ls(dirId, recursive);
-    }
-     
 }

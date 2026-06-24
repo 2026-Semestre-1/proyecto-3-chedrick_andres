@@ -22,6 +22,7 @@ public class CommandFactory {
         comandos.put("cd",  new CdCommand(fs, state));
         comandos.put("mv", new MvCommand(fs, state));
         comandos.put("whereis", new WhereisCommand(fs, state));
+        comandos.put("useradd", new CommandAddUser(fs, state, scanner));
     }
     
 

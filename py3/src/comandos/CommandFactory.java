@@ -18,8 +18,12 @@ public class CommandFactory {
         comandos.put("rm",    new RmCommand(fs, state));
         comandos.put("cat",   new CatCommand(fs, state));
         comandos.put("write", new WriteCommand(fs, state, scanner));
-        //FALTAN
+        comandos.put("pwd", new PwdCommand(fs, state));
+        comandos.put("cd",  new CdCommand(fs, state));
+        comandos.put("mv", new MvCommand(fs, state));
+        comandos.put("whereis", new WhereisCommand(fs, state));
     }
+    
 
     public Command getCommand(String nombre) {
         return comandos.get(nombre);

@@ -29,6 +29,7 @@ public class CommandFactory {
         comandos.put("passwd", new CommandPasswd(fs, state, scanner));
         comandos.put("whoami", new CommandWhoami(fs, state));
         comandos.put("groupadd", new CommandGroupAdd(fs, state));
+        comandos.put("chown", new CommandChown(fs, state));
     }
     
 

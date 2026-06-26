@@ -4,12 +4,14 @@
  */
 package fileSystem;
 
-import nucleo.SuperBlock;
-import nucleo.MapaDeBits;
-import nucleo.Inode;
 import administradorDisco.DiskManager;
 import java.io.IOException;
 import java.util.Scanner;
+import nucleo.Group;
+import nucleo.Inode;
+import nucleo.MapaDeBits;
+import nucleo.SuperBlock;
+import nucleo.User;
 
 /**
  *
@@ -23,7 +25,14 @@ public class FileSystem {
     public DiskManager diskManager;
     public static final int INODE_SIZE = 1024;
 
+    public User[] userTable;
+    public int userCount = 0;
+    public Group[] groupTable;
+    public int groupCount = 0;
+
     public FileSystem() {
+        userTable = new User[User.MAX_USERS];
+        groupTable = new Group[Group.MAX_GROUPS];
     }
 
     public void format(int diskMB, int blockSize, String filename) throws ClassNotFoundException {
@@ -38,7 +47,6 @@ public class FileSystem {
             superblock.init("miFS", diskSizeBytes, blockSize, filename);
 
             bitmap = new MapaDeBits(superblock.totalBlocks);
-
             inodeTable = new Inode[superblock.maxInodes];
 
             diskManager = new DiskManager(filename);
@@ -59,6 +67,14 @@ public class FileSystem {
                 return;
             }
 
+            // Crear usuario root en la tabla de usuarios
+            User rootUser = new User();
+            rootUser.init(0, "root", "Root User", password, 0, true);
+            userTable[0] = rootUser;
+            userCount++;
+            diskManager.writeUser(rootUser, superblock.userTableOffset, User.USER_SIZE);
+
+            // Crear inodo raíz "/"
             Inode root = new Inode();
             root.init(0, "/", Inode.DIR, 0, 0, -1);
             root.ownerPerm = 7;
@@ -77,8 +93,14 @@ public class FileSystem {
 
             diskManager.writeInode(root, superblock.inodeTableOffset, INODE_SIZE);
             diskManager.writeInode(homeRoot, superblock.inodeTableOffset, INODE_SIZE);
-
             diskManager.writeSuperBlock(superblock);
+            
+            Group rootGroup = new Group();
+            rootGroup.init(0, "root");
+            rootGroup.addMember(0); // root pertenece al grupo root
+            groupTable[0] = rootGroup;
+            groupCount++;
+            diskManager.writeGroup(rootGroup, superblock.groupTableOffset, Group.GROUP_SIZE);
 
             System.out.println();
             System.out.println("Usuario root creado con carpeta HOME en /root");

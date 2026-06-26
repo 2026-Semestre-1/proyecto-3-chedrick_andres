@@ -4,9 +4,11 @@
  */
 package administradorDisco;
 import java.io.*;
-import nucleo.SuperBlock;
-import nucleo.MapaDeBits;
+import nucleo.Group;
 import nucleo.Inode;
+import nucleo.MapaDeBits;
+import nucleo.SuperBlock;
+import nucleo.User;
 /**
  *
  * @author joses
@@ -202,5 +204,35 @@ public class DiskManager {
 
     public long getFileSize() {
         return new File(filename).length();
+    }
+    public void writeUser(User user, long userTableOffset, int userSize) throws IOException {
+        byte[] data = serialize(user);
+        long pos = userTableOffset + ((long) user.userId * userSize);
+        disk.seek(pos);
+        disk.write(data);
+    }
+
+    public User readUser(int userId, long userTableOffset, int userSize) 
+        throws IOException, ClassNotFoundException {
+        long pos = userTableOffset + ((long) userId * userSize);
+        disk.seek(pos);
+        byte[] data = new byte[userSize];
+        disk.read(data);
+        return (User) deserialize(data);
+    }
+    public void writeGroup(Group group, long groupTableOffset, int groupSize) throws IOException {
+        byte[] data = serialize(group);
+        long pos = groupTableOffset + ((long) group.groupId * groupSize);
+        disk.seek(pos);
+        disk.write(data);
+    }
+ 
+    public Group readGroup(int groupId, long groupTableOffset, int groupSize)
+        throws IOException, ClassNotFoundException {
+        long pos = groupTableOffset + ((long) groupId * groupSize);
+        disk.seek(pos);
+        byte[] data = new byte[groupSize];
+        disk.read(data);
+        return (Group) deserialize(data);
     }
 }

@@ -37,6 +37,8 @@ public class SuperBlock implements Serializable {
     public long bitmapOffset;
     public long inodeTableOffset;
     public long dataBlocksOffset;
+    public long userTableOffset;
+    public long groupTableOffset;
 
     public SuperBlock() {
     }
@@ -78,6 +80,8 @@ public class SuperBlock implements Serializable {
         // Bloques de datos van despues de la tabla de inodos
         int inodeSize = 1024; 
         this.dataBlocksOffset = inodeTableOffset + ((long) maxInodes * inodeSize);
+        this.userTableOffset = dataBlocksOffset + ((long) totalBlocks * blockSize);
+        this.groupTableOffset = userTableOffset + ((long) User.MAX_USERS * User.USER_SIZE);
     }
 
     public boolean isValid() {

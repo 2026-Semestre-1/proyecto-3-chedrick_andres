@@ -22,6 +22,8 @@ public class CommandFactory {
         comandos.put("cd",  new CdCommand(fs, state));
         comandos.put("mv", new MvCommand(fs, state));
         comandos.put("whereis", new WhereisCommand(fs, state));
+       // comandos.put("note", new NoteCommand(fs, state, scanner));
+       comandos.put("hexCheck", new HexCheckCommand(fs, state)); 
         comandos.put("useradd", new CommandAddUser(fs, state, scanner));
         comandos.put("su", new CommandSu(fs, state, scanner));
         comandos.put("passwd", new CommandPasswd(fs, state, scanner));

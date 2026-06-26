@@ -1,6 +1,5 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
 package Main;
 
@@ -13,20 +12,31 @@ import shell.Shell;
  */
 public class Py3 {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException {
         FileSystem fs = new FileSystem();
 
         if (args.length == 0) {
-            // java myFileSystem -> formatea uno nuevo
             System.out.println("No se especificó disco. Creando uno nuevo...");
-            System.out.print("Tamaño del disco en MB: ");
-            // Por ahora lo dejamos fijo para probar; luego usamos Scanner aquí también
             fs.format(10, 512, "miDiscoDuro.fs");
         } else {
-            // java myFileSystem miDiscoDuro.fs -> cargar uno existente
-            System.out.println("(pendiente: cargar disco existente: " + args[0] + ")");
-            return;
+            String filename = args[0];
+            boolean cargado = fs.load(filename);
+
+            if (!cargado) {
+                System.out.println("No se pudo cargar el disco. Cerrando programa.");
+                return;
+            }
         }
+
+        // En Py3.java, justo después de fs.load(filename) exitoso, ANTES de crear el Shell
+        if (fs.inodeTable[0] == null) {
+            System.out.println("DEBUG: inodeTable[0] es null");
+        } else {
+            System.out.println("DEBUG: inodeTable[0].type = " + fs.inodeTable[0].type);
+            System.out.println("DEBUG: inodeTable[0].name = " + fs.inodeTable[0].name);
+        }
+        
+        
 
         Shell shell = new Shell(fs);
         shell.run();

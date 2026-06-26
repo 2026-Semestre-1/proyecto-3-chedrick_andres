@@ -4,7 +4,7 @@ import fileSystem.FileSystem;
 import java.io.IOException;
 import java.util.Scanner;
 import nucleo.Inode;
-import nucleo.UserEntry;
+import nucleo.User;
 
 public class CommandAddUser implements Command {
 
@@ -36,8 +36,8 @@ public class CommandAddUser implements Command {
         String username = args[1];
 
         // 3. Verificar límite de usuarios
-        if (fs.userCount >= UserEntry.MAX_USERS) {
-            System.out.println("Error: se alcanzó el límite máximo de usuarios (" + UserEntry.MAX_USERS + ")");
+        if (fs.userCount >= User.MAX_USERS) {
+            System.out.println("Error: se alcanzó el límite máximo de usuarios (" + User.MAX_USERS + ")");
             return;
         }
 
@@ -78,8 +78,8 @@ public class CommandAddUser implements Command {
         // 7. Asignar userId (el siguiente disponible)
         int newUserId = fs.userCount;
 
-        // 8. Crear el UserEntry
-        UserEntry newUser = new UserEntry();
+        // 8. Crear el User
+        User newUser = new User();
         newUser.init(newUserId, username, fullName, password, newUserId, false);
 
         // 9. Buscar o crear /home, luego crear /home/username
@@ -97,7 +97,7 @@ public class CommandAddUser implements Command {
 
         // 11. Persistir en disco
         try {
-            fs.diskManager.writeUser(newUser, fs.superblock.userTableOffset, UserEntry.USER_SIZE);
+            fs.diskManager.writeUser(newUser, fs.superblock.userTableOffset, User.USER_SIZE);
             fs.diskManager.writeSuperBlock(fs.superblock);
             System.out.println("Usuario '" + username + "' creado correctamente");
             System.out.println("Home: " + newUser.homePath);

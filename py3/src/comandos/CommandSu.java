@@ -1,7 +1,7 @@
 package comandos;
 
 import fileSystem.FileSystem;
-import nucleo.UserEntry;
+import nucleo.User;
 import java.util.Scanner;
 
 public class CommandSu implements Command {
@@ -24,7 +24,7 @@ public class CommandSu implements Command {
         String targetUsername = (args.length >= 2) ? args[1] : "root";
 
         // Buscar el usuario en la tabla
-        UserEntry targetUser = buscarUsuario(targetUsername);
+        User targetUser = buscarUsuario(targetUsername);
 
         if (targetUser == null) {
             System.out.println("Error: el usuario '" + targetUsername + "' no existe");
@@ -59,7 +59,7 @@ public class CommandSu implements Command {
     }
 
     // Busca un usuario por username en la tabla
-    private UserEntry buscarUsuario(String username) {
+    private User buscarUsuario(String username) {
         for (int i = 0; i < fs.userCount; i++) {
             if (fs.userTable[i] != null && fs.userTable[i].username.equals(username)) {
                 return fs.userTable[i];
@@ -71,7 +71,7 @@ public class CommandSu implements Command {
     // Busca el inodo del home del usuario recorriendo el árbol
     // root    → inodo con nombre "root" hijo de "/"
     // otros   → inodo con nombre username hijo de "/home"
-    private int buscarHome(UserEntry user) {
+    private int buscarHome(User user) {
         if (user.isRoot) {
             // /root está directamente bajo la raíz (inodo 0)
             return fs.buscarInodePorNombre("root", 0);

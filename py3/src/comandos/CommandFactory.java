@@ -24,6 +24,9 @@ public class CommandFactory {
         comandos.put("whereis", new WhereisCommand(fs, state));
         comandos.put("useradd", new CommandAddUser(fs, state, scanner));
         comandos.put("su", new CommandSu(fs, state, scanner));
+        comandos.put("passwd", new CommandPasswd(fs, state, scanner));
+        comandos.put("whoami", new CommandWhoami(fs, state));
+        comandos.put("groupadd", new CommandGroupAdd(fs, state));
     }
     
 

@@ -8,7 +8,7 @@ import java.util.Date;
  * Representa un usuario del sistema de archivos.
  * Se serializa y guarda en la sección de usuarios del .fs
  */
-public class UserEntry implements Serializable {
+public class User implements Serializable {
 
     public static final int MAX_USERS = 50; // máximo de usuarios permitidos
     public static final int USER_SIZE  = 512; // bytes reservados por usuario en disco
@@ -35,7 +35,7 @@ public class UserEntry implements Serializable {
     // Estado
     public boolean active;
 
-    public UserEntry() {}
+    public User() {}
 
     public void init(int userId, String username, String fullName, String password, int groupId, boolean isRoot) {
         this.userId       = userId;

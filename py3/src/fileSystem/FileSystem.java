@@ -35,7 +35,7 @@ public class FileSystem {
         groupTable = new Group[Group.MAX_GROUPS];
     }
 
-    public void format(int diskMB, int blockSize, String filename) {
+    public void format(int diskMB, int blockSize, String filename) throws ClassNotFoundException {
         try {
             long diskSizeBytes = (long) diskMB * 1024 * 1024;
 
@@ -105,10 +105,49 @@ public class FileSystem {
             System.out.println();
             System.out.println("Usuario root creado con carpeta HOME en /root");
             System.out.println("Disco formateado exitosamente: " + filename);
+            System.out.println("DEBUG: verificando inodo 0 justo antes de salir de format()");
+            Inode verificacion = diskManager.readInode(0, superblock.inodeTableOffset, INODE_SIZE);
+            System.out.println("DEBUG: verificacion.type = " + verificacion.type);
+            
             superblock.print();
 
         } catch (IOException e) {
             System.out.println("Error al formatear el disco: " + e.getMessage());
+        }
+    }
+
+   
+   public boolean load(String filename) {
+        try {
+            diskManager = new DiskManager(filename);
+            diskManager.openDisk();
+
+            superblock = diskManager.readSuperBlock(2048);
+
+            if (!superblock.isValid()) {
+                System.out.println("Error: '" + filename + "' no es un disco válido (firma incorrecta)");
+                return false;
+            }
+
+            // Le damos margen extra al tamaño de lectura del bitmap ESTO resuelve mi bug de leer tamanos grandes de bits
+            int bitmapRawSize = (superblock.totalBlocks / 8) + 1;
+            int bitmapReadSize = bitmapRawSize + 200; // margen para overhead de serialización
+            bitmap = diskManager.readBitmap(superblock.bitmapOffset, bitmapReadSize);
+
+            inodeTable = diskManager.readAllInodes(superblock.inodeTableOffset, INODE_SIZE, superblock.maxInodes);
+
+            superblock.updateLastMounted();
+            diskManager.writeSuperBlock(superblock);
+
+            System.out.println("Disco cargado exitosamente: " + filename);
+            superblock.print();
+
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error al cargar el disco: " + e.getMessage());
+            return false;
         }
     }
 

@@ -16,7 +16,7 @@ public class SuperBlock implements Serializable {
 // Esto es lo de la firma de MBR
     public static final short MAGIC = (short) 0xAA55;
     public short magic;
-    public String filename;  // nombre del archivo .fs "miDiscoDuro.fs"
+    public String filename ;  // nombre del archivo .fs "miDiscoDuro.fs"
     
     public String fsName;
     public long createdAt;
@@ -46,7 +46,7 @@ public class SuperBlock implements Serializable {
     public void init(String name, long diskSizeBytes, int blockSize, String fileName) {
         
         this.magic = MAGIC;
-        this.filename = filename;
+        this.filename = fileName;
         
        
         this.fsName = name;
@@ -72,13 +72,13 @@ public class SuperBlock implements Serializable {
 
         // el Bitmap va despu del superbloque
         this.bitmapOffset = sbEnd;
-        int bitmapSize = (totalBlocks / 8) + 1;
+        int bitmapMaxSize = 3000;
 
         // la tabla de inodos va despues del bitmap
-        this.inodeTableOffset = bitmapOffset + bitmapSize;
+        this.inodeTableOffset = bitmapOffset + bitmapMaxSize;
 
         // Bloques de datos van despues de la tabla de inodos
-        int inodeSize = 256; // -> 
+        int inodeSize = 1024; 
         this.dataBlocksOffset = inodeTableOffset + ((long) maxInodes * inodeSize);
         this.userTableOffset = dataBlocksOffset + ((long) totalBlocks * blockSize);
         this.groupTableOffset = userTableOffset + ((long) User.MAX_USERS * User.USER_SIZE);

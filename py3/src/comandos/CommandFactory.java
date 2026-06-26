@@ -32,6 +32,9 @@ public class CommandFactory {
         comandos.put("chown", new CommandChown(fs, state));
         comandos.put("chgrp", new CommandChgrp(fs, state));
         comandos.put("chmod", new CommandChmod(fs, state));
+        comandos.put("addtogroup", new CommandAddToGroup(fs, state));
+        comandos.put("viewFilesOpen", new CommandViewFilesOpen(fs, state));
+        comandos.put("viewFCB", new CommandViewFCB(fs, state));
     }
     
 

@@ -46,11 +46,15 @@ public class CommandChown implements Command {
                     return;
                 }
                 directorioValido = false;
+                System.out.println(state.currentUserId);
                 for (Inode inodeTable : fs.inodeTable) {
-                    if(inodeTable.name != null){
+                    if(inodeTable != null && inodeTable.name != null){
                         if(inodeTable.name.equals(args[2])){
                             inodeActualizado = inodeTable;
+                            System.out.println(inodeTable.ownerId);
                             if(state.currentUserId == 0 || state.currentUserId == inodeTable.ownerId){
+                                
+                                System.out.println("Si es valido el usuario");
                                 directorioValido = true;
                                 inodeTable.ownerId = newOwner;
                                 asignado = true;
@@ -94,7 +98,7 @@ public class CommandChown implements Command {
                 directorioValido = false;
                 boolean esDir = false;
                 for (Inode inodeTable : fs.inodeTable) {
-                    if(inodeTable.name != null){
+                    if(inodeTable != null && inodeTable.name != null){
                         if(inodeTable.name.equals(args[3]) && (inodeTable.type == null ? Inode.DIR == null : inodeTable.type.equals(Inode.DIR))){
                             esDir = true;
                             if(state.currentUserId == 0 || state.currentUserId == inodeTable.ownerId){

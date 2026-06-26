@@ -23,7 +23,7 @@ public class TouchCommand implements Command {
 
         String name = args[1];
         int parentId = state.currentDirId;
-        int ownerId = 0;
+        int ownerId = state.currentUserId;
         int groupId = 0;
 
         try {

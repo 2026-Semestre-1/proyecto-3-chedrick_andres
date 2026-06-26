@@ -4,9 +4,9 @@
 package comandos;
 
 import fileSystem.FileSystem;
-import nucleo.Inode;
 import java.io.IOException;
 import java.util.Scanner;
+import nucleo.Inode;
 
 /**
  *
@@ -49,8 +49,15 @@ public class NoteCommand implements Command {
             }
 
             // Validacin de permisos: solo se abre si tiene acceso
-            int ownerId = state.getUserId();
-            int groupId = state.getGroupId();
+            int ownerId = state.currentUserId;
+            int groupId = -1;
+            for(int i = 0; i < fs.userTable.length; i++) {
+                if (fs.userTable[i] != null && fs.userTable[i].userId == ownerId) {
+                    groupId = fs.userTable[i].groupId;
+                    break;
+                }
+            }
+
             if (!inode.canWrite(ownerId, groupId)) {
                 System.out.println("Error: no tiene permisos para editar '" + nombre + "'");
                 return;
@@ -189,9 +196,17 @@ public class NoteCommand implements Command {
                 System.out.println("Error: tabla de inodos llena");
                 return;
             }
+            int ownerId = state.currentUserId;
+            int groupId = -1;
+            for(int i = 0; i < fs.userTable.length; i++) {
+                if (fs.userTable[i] != null && fs.userTable[i].userId == ownerId) {
+                    groupId = fs.userTable[i].groupId;
+                    break;
+                }
+            }
 
             Inode nuevo = new Inode();
-            nuevo.init(newId, nombre, Inode.FILE, state.getUserId(), state.getGroupId(), parentId);
+            nuevo.init(newId, nombre, Inode.FILE, state.currentUserId, groupId, parentId);
             nuevo.ownerPerm = 6;
             nuevo.groupPerm = 4;
             nuevo.sizeBytes = 0;

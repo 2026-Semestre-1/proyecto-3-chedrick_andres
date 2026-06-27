@@ -135,23 +135,25 @@ public class Inode implements Serializable{
 
     // Verifica permisos -> perm: 4=read 2=write 1=execute
     public boolean canRead(int userId, int userGroupId) {
-        if (userId == 0) return true; // root puede todo
-        if (userId == ownerId)     return (ownerPerm & 4) != 0;
-        if (userGroupId == groupId) return (groupPerm & 4) != 0;
+        if (userId == 0) return true;                              // root puede todo
+        if (userId == ownerId) return (ownerPerm & 4) != 0;       // es el dueño
+        if (userGroupId != -1 && userGroupId == groupId) return (groupPerm & 4) != 0;
         return false;
     }
 
     public boolean canWrite(int userId, int userGroupId) {
         if (userId == 0) return true;
-        if (userId == ownerId)     return (ownerPerm & 2) != 0;
-        if (userGroupId == groupId) return (groupPerm & 2) != 0;
+        if (userId == ownerId) return (ownerPerm & 2) != 0;
+        if (userGroupId != -1 && userGroupId == groupId)
+            return (groupPerm & 2) != 0;
         return false;
     }
 
     public boolean canExecute(int userId, int userGroupId) {
         if (userId == 0) return true;
-        if (userId == ownerId)     return (ownerPerm & 1) != 0;
-        if (userGroupId == groupId) return (groupPerm & 1) != 0;
+        if (userId == ownerId) return (ownerPerm & 1) != 0;
+        if (userGroupId != -1 && userGroupId == groupId)
+            return (groupPerm & 1) != 0;
         return false;
     }
 

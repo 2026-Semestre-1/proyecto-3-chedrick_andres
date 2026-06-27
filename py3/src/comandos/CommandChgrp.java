@@ -48,7 +48,7 @@ public class CommandChgrp implements Command {
 
                 inodeValido = false;
                 for (Inode inodeTable : fs.inodeTable) {
-                    if (inodeTable != null && inodeTable.name != null && inodeTable.name.equals(args[2])) {
+                    if (inodeTable != null && inodeTable.getFullName() != null && inodeTable.getFullName().equals(args[2])) {
                         inodeActualizado = inodeTable;
                         if (state.currentUserId == 0 || state.currentUserId == inodeTable.ownerId) {
                             inodeValido = true;
@@ -98,7 +98,7 @@ public class CommandChgrp implements Command {
                 inodeValido = false;
                 boolean esDir = false;
                 for (Inode inodeTable : fs.inodeTable) {
-                    if (inodeTable != null && inodeTable.name != null && inodeTable.name.equals(args[3])) {
+                    if (inodeTable != null && inodeTable.getFullName() != null && inodeTable.getFullName().equals(args[3])) {
                         if (inodeTable.type.equals(Inode.DIR)) {
                             esDir = true;
                             if (state.currentUserId == 0 || state.currentUserId == inodeTable.ownerId) {

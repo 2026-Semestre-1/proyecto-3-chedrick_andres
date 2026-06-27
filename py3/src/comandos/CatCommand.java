@@ -29,9 +29,17 @@ public class CatCommand implements Command {
 
         try {
             Inode inode = fs.inodeTable[inodeId];
+            System.out.println("DEBUG groupId del archivo: " + inode.groupId);
+            System.out.println("DEBUG currentGroupId de jose: " + state.currentGroupId);
+            System.out.println("DEBUG ownerId del archivo: " + inode.ownerId);
+            System.out.println("DEBUG currentUserId: " + state.currentUserId);
 
             if (inode == null || !inode.type.equals(Inode.FILE)) {
                 System.out.println("Error: no es un archivo válido");
+                return;
+            }
+            if (!inode.canRead(state.currentUserId, state.currentGroupId)) {
+                System.out.println("Error: no tenés permisos para leer este archivo");
                 return;
             }
 

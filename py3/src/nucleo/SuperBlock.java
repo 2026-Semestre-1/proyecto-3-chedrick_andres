@@ -21,6 +21,8 @@ public class SuperBlock implements Serializable {
     public String fsName;
     public long createdAt;
     public long lastMounted;
+    public int userCount;
+    public int groupCount;
 
     public long totalSizeBytes;
     public int blockSize;
@@ -47,7 +49,8 @@ public class SuperBlock implements Serializable {
         
         this.magic = MAGIC;
         this.filename = fileName;
-        
+        this.userCount  = 0;
+        this.groupCount = 0;
        
         this.fsName = name;
         this.createdAt = System.currentTimeMillis();
@@ -123,6 +126,8 @@ public class SuperBlock implements Serializable {
         System.out.println("Bloques totales:   " + totalBlocks);
         System.out.println("Bloques usados:    " + usedBlocks);
         System.out.println("Bloques libres:    " + freeBlocks);
+        System.out.println("Usuarios:          " + userCount);
+        System.out.println("Grupos:            " + groupCount);
         System.out.println("Inodos totales:    " + maxInodes);
         System.out.println("Inodos usados:     " + usedInodes);
         System.out.println("Inodos libres:     " + freeInodes);

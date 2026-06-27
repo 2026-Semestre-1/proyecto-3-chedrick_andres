@@ -72,6 +72,7 @@ public class FileSystem {
             rootUser.init(0, "root", "Root User", password, 0, true);
             userTable[0] = rootUser;
             userCount++;
+            superblock.userCount++;
             diskManager.writeUser(rootUser, superblock.userTableOffset, User.USER_SIZE);
 
             // Crear inodo raíz "/"
@@ -100,7 +101,9 @@ public class FileSystem {
             rootGroup.addMember(0); // root pertenece al grupo root
             groupTable[0] = rootGroup;
             groupCount++;
+            superblock.groupCount++;
             diskManager.writeGroup(rootGroup, superblock.groupTableOffset, Group.GROUP_SIZE);
+            diskManager.writeSuperBlock(superblock);
 
             System.out.println();
             System.out.println("Usuario root creado con carpeta HOME en /root");
@@ -140,6 +143,19 @@ public class FileSystem {
             diskManager.writeSuperBlock(superblock);
 
             System.out.println("Disco cargado exitosamente: " + filename);
+            userTable = new User[User.MAX_USERS];
+            userCount = superblock.userCount;
+            for (int i = 0; i < superblock.userCount; i++) {
+                userTable[i] = diskManager.readUser(i, superblock.userTableOffset, User.USER_SIZE);
+            }
+            System.out.println("Usuarios cargados: " + userCount);
+
+            groupTable = new Group[Group.MAX_GROUPS];
+            groupCount = superblock.groupCount;
+            for (int i = 0; i < superblock.groupCount; i++) {
+                groupTable[i] = diskManager.readGroup(i, superblock.groupTableOffset, Group.GROUP_SIZE);
+            }
+            System.out.println("Grupos cargados: " + groupCount);
             superblock.print();
 
             return true;

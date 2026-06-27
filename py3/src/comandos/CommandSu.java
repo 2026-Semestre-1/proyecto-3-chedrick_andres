@@ -48,6 +48,7 @@ public class CommandSu implements Command {
         // Cambiar el estado de la sesión
         state.currentUserId = targetUser.userId;
         state.username      = targetUser.username;
+        state.currentGroupId = targetUser.groupId;
 
         // Cambiar al directorio home del usuario
         int homeId = buscarHome(targetUser);

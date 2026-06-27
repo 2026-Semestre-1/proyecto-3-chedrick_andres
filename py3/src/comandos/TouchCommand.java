@@ -37,8 +37,8 @@ public class TouchCommand implements Command {
                 System.out.println("Error: el directorio no existe o no es válido");
                 return;
             }
-            if (state.currentUserId != 0 && parent.ownerId != state.currentUserId) {
-                System.out.println("Error: no tenés permisos para crear archivos en este directorio");
+            if (state.currentUserId != 0 && !parent.canWrite(state.currentUserId, state.currentGroupId)) {
+                System.out.println("Error: no tienes permisos para crear archivos en este directorio");
                 return;
             }
 

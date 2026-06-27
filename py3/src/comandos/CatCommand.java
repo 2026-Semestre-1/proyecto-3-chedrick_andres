@@ -34,6 +34,10 @@ public class CatCommand implements Command {
                 System.out.println("Error: no es un archivo válido");
                 return;
             }
+            if (!inode.canRead(state.currentUserId, state.currentGroupId)) {
+                System.out.println("Error: no tenés permisos para leer este archivo");
+                return;
+            }
 
             int[] blocks = inode.getUsedBlocks();
             if (blocks.length == 0) {

@@ -49,7 +49,7 @@ public class CommandChown implements Command {
                 System.out.println(state.currentUserId);
                 for (Inode inodeTable : fs.inodeTable) {
                     if(inodeTable != null && inodeTable.name != null){
-                        if(inodeTable.name.equals(args[2])){
+                        if(inodeTable.getFullName().equals(args[2])){
                             inodeActualizado = inodeTable;
                             System.out.println(inodeTable.ownerId);
                             if(state.currentUserId == 0 || state.currentUserId == inodeTable.ownerId){
@@ -99,7 +99,7 @@ public class CommandChown implements Command {
                 boolean esDir = false;
                 for (Inode inodeTable : fs.inodeTable) {
                     if(inodeTable != null && inodeTable.name != null){
-                        if(inodeTable.name.equals(args[3]) && (inodeTable.type == null ? Inode.DIR == null : inodeTable.type.equals(Inode.DIR))){
+                        if(inodeTable.getFullName().equals(args[3]) && (inodeTable.type == null ? Inode.DIR == null : inodeTable.type.equals(Inode.DIR))){
                             esDir = true;
                             if(state.currentUserId == 0 || state.currentUserId == inodeTable.ownerId){
                                 inodeActualizado = inodeTable;

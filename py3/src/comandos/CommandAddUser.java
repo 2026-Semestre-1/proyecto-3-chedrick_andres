@@ -77,10 +77,11 @@ public class CommandAddUser implements Command {
 
 
         int newUserId = fs.userCount;
+        int group = -1;
 
 
         User newUser = new User();
-        newUser.init(newUserId, username, fullName, password, newUserId, false);
+        newUser.init(newUserId, username, fullName, password, group, false);
 
         //Buscar o crear /home, luego crear /home/username
         int homeParentId = getOrCreateHomeDir();

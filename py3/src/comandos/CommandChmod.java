@@ -41,8 +41,8 @@ public class CommandChmod implements Command {
         Inode inodeActualizado = null;
         boolean directorioValido = false;
         for (Inode inodeTable : fs.inodeTable) {
-            if(inodeTable != null && inodeTable.name != null){
-                if(inodeTable.name.equals(args[2])){
+            if(inodeTable != null && inodeTable.getFullName() != null){
+                if(inodeTable.getFullName().equals(args[2])){
                     inodeActualizado = inodeTable;
                     if(state.currentUserId == 0 || state.currentUserId == inodeTable.ownerId){
                         directorioValido = true;

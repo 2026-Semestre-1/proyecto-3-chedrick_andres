@@ -37,6 +37,10 @@ public class TouchCommand implements Command {
                 System.out.println("Error: el directorio no existe o no es válido");
                 return;
             }
+            if (state.currentUserId != 0 && parent.ownerId != state.currentUserId) {
+                System.out.println("Error: no tenés permisos para crear archivos en este directorio");
+                return;
+            }
 
             for (int i = 0; i < parent.childCount; i++) {
                 Inode child = fs.inodeTable[parent.children[i]];
@@ -68,6 +72,7 @@ public class TouchCommand implements Command {
                 fs.bitmap.free(blocks);
                 return;
             }
+            
 
             Inode nuevo = new Inode();
             nuevo.init(newId, name, Inode.FILE, ownerId, groupId, parentId);

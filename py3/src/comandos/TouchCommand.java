@@ -71,7 +71,7 @@ public class TouchCommand implements Command {
             fs.superblock.blockUsed(blocks.length);
             fs.diskManager.writeInode(nuevo, fs.superblock.inodeTableOffset, FileSystem.INODE_SIZE);
             fs.diskManager.writeInode(parent, fs.superblock.inodeTableOffset, FileSystem.INODE_SIZE);
-            fs.diskManager.writeBitmap(fs.bitmap, fs.superblock.bitmapOffset);
+            fs.diskManager.writeBitmap(fs.bitmap, fs.superblock.bitmapOffset, fs.superblock.bitmapMaxSize);
             fs.diskManager.writeSuperBlock(fs.superblock);
             System.out.println("Archivo creado");
         } catch (IOException e) {

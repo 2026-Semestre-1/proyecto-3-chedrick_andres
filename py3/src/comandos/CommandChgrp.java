@@ -60,7 +60,7 @@ public class CommandChgrp implements Command {
                 }
 
                 if (!inodeValido) {
-                    System.out.println("Error: solo root o el dueño puede cambiar el grupo");
+                    System.out.println("Error: solo root o el dueño pueden cambiar archivos de grupo");
                     return;
                 }
 

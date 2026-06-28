@@ -36,7 +36,7 @@ public class Py3 {
             boolean formatoValido = false;
 
             while (!formatoValido) {
-                System.out.print("ccampos@miFS: ");
+                System.out.print("sistemaArchivos@miFS: ");
                 String comandoFormat = sc.nextLine().trim();
                 String[] partesFormat = comandoFormat.split("\\s+");
 

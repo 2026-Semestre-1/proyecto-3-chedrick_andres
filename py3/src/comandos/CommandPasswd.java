@@ -21,7 +21,6 @@ public class CommandPasswd implements Command {
     @Override
     public void execute(String[] args) {
 
-        // 1. Validar argumentos
         if (args.length < 2) {
             System.out.println("Uso: passwd username");
             return;
@@ -29,7 +28,6 @@ public class CommandPasswd implements Command {
 
         String targetUsername = args[1];
 
-        // 2. Buscar el usuario en la tabla
         User targetUser = buscarUsuario(targetUsername);
 
         if (targetUser == null) {
@@ -37,9 +35,7 @@ public class CommandPasswd implements Command {
             return;
         }
 
-        // 3. Verificar permisos:
-        //    root puede cambiar cualquier contraseña
-        //    un usuario normal solo puede cambiar la suya
+
         boolean esRoot = (state.currentUserId == 0);
         boolean esSuPropia = (targetUser.userId == state.currentUserId);
 
@@ -48,7 +44,6 @@ public class CommandPasswd implements Command {
             return;
         }
 
-        // 4. Pedir nueva contraseña y confirmación
         System.out.print("password: ");
         String newPassword = scanner.nextLine();
 
@@ -65,10 +60,9 @@ public class CommandPasswd implements Command {
             return;
         }
 
-        // 5. Actualizar el hash en memoria
         targetUser.passwordHash = User.hashPassword(newPassword);
 
-        // 6. Persistir en disco
+
         try {
             fs.diskManager.writeUser(targetUser, fs.superblock.userTableOffset, User.USER_SIZE);
             System.out.println("Contraseña de '" + targetUsername + "' actualizada correctamente");
@@ -77,7 +71,6 @@ public class CommandPasswd implements Command {
         }
     }
 
-    // Busca un usuario por username en la tabla
     private User buscarUsuario(String username) {
         for (int i = 0; i < fs.userCount; i++) {
             if (fs.userTable[i] != null && fs.userTable[i].username.equals(username)) {

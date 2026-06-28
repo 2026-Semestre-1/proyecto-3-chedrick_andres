@@ -35,7 +35,12 @@ public class RmCommand implements Command {
 
             Inode target = fs.inodeTable[targetId];
             Inode parent = fs.inodeTable[dirId];
-
+            
+            if (state.currentUserId != 0 && !target.canWrite(state.currentUserId, state.currentGroupId)) {
+                System.out.println("Error: no tenés permisos para eliminar '" + name + "'");
+                return;
+            }
+            
             if (target.type.equals(Inode.DIR) && target.childCount > 0 && !recursivo) {
                 System.out.println("Error: '" + name + "' no está vacío. Use -R para borrar recursivamente");
                 return;

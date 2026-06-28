@@ -54,7 +54,6 @@ public class CommandChown implements Command {
                             System.out.println(inodeTable.ownerId);
                             if(state.currentUserId == 0 || state.currentUserId == inodeTable.ownerId){
                                 
-                                System.out.println("Si es valido el usuario");
                                 directorioValido = true;
                                 inodeTable.ownerId = newOwner;
                                 asignado = true;

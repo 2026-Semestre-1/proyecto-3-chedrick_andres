@@ -63,7 +63,7 @@ public class RmCommand implements Command {
             fs.inodeTable[targetId] = null;
             fs.superblock.inodeFreed();
 
-            fs.diskManager.writeBitmap(fs.bitmap, fs.superblock.bitmapOffset);
+            fs.diskManager.writeBitmap(fs.bitmap, fs.superblock.bitmapOffset, fs.superblock.bitmapMaxSize);
             fs.diskManager.writeInode(parent, fs.superblock.inodeTableOffset, FileSystem.INODE_SIZE);
             fs.diskManager.writeSuperBlock(fs.superblock);
 

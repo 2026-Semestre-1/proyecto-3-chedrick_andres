@@ -169,7 +169,7 @@ public class NoteCommand implements Command {
             }
 
             fs.diskManager.writeInode(inode, fs.superblock.inodeTableOffset, FileSystem.INODE_SIZE);
-            fs.diskManager.writeBitmap(fs.bitmap, fs.superblock.bitmapOffset);
+            fs.diskManager.writeBitmap(fs.bitmap, fs.superblock.bitmapOffset, fs.superblock.bitmapMaxSize);
             fs.diskManager.writeSuperBlock(fs.superblock);
 
             System.out.println("Archivo guardado correctamente");

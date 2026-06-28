@@ -35,32 +35,31 @@ public class FileSystem {
         groupTable = new Group[Group.MAX_GROUPS];
     }
 
-    public void format(int diskMB, int blockSize, String filename) throws ClassNotFoundException {
-        try {
-            long diskSizeBytes = (long) diskMB * 1024 * 1024;
+   public void format(int diskMB, int blockSize, String filename, Scanner sc) throws ClassNotFoundException {
+    try {
+        long diskSizeBytes = (long) diskMB * 1024 * 1024;
 
-            System.out.println("---- Ejecutando format--- ");
-            System.out.println("Tamaño solicitado: " + diskMB + " MB");
-            System.out.println("Tamaño de bloque:  " + blockSize + " bytes");
+        System.out.println("---- Ejecutando format--- ");
+        System.out.println("Tamaño solicitado: " + diskMB + " MB");
+        System.out.println("Tamaño de bloque:  " + blockSize + " bytes");
 
-            superblock = new SuperBlock();
-            superblock.init("miFS", diskSizeBytes, blockSize, filename);
+        superblock = new SuperBlock();
+        superblock.init("miFS", diskSizeBytes, blockSize, filename);
 
-            bitmap = new MapaDeBits(superblock.totalBlocks);
-            inodeTable = new Inode[superblock.maxInodes];
+        bitmap = new MapaDeBits(superblock.totalBlocks);
+        inodeTable = new Inode[superblock.maxInodes];
 
-            diskManager = new DiskManager(filename);
-            diskManager.createDisk(diskSizeBytes);
-            diskManager.openDisk();
+        diskManager = new DiskManager(filename);
+        diskManager.createDisk(diskSizeBytes);
+        diskManager.openDisk();
 
-            diskManager.writeSuperBlock(superblock);
-            diskManager.writeBitmap(bitmap, superblock.bitmapOffset);
+        diskManager.writeSuperBlock(superblock);
+        diskManager.writeBitmap(bitmap, superblock.bitmapOffset, superblock.bitmapMaxSize);
 
-            Scanner sc = new Scanner(System.in);
-            System.out.print("Defina password para root: ");
-            String password = sc.nextLine();
-            System.out.print("Confirme password: ");
-            String confirm = sc.nextLine();
+        System.out.print("Defina password para root: ");
+        String password = sc.nextLine();
+        System.out.print("Confirme password: ");
+        String confirm = sc.nextLine();
 
             if (!password.equals(confirm)) {
                 System.out.println("Error: las contraseñas no coinciden");
@@ -108,11 +107,11 @@ public class FileSystem {
             System.out.println();
             System.out.println("Usuario root creado con carpeta HOME en /root");
             System.out.println("Disco formateado exitosamente: " + filename);
-            System.out.println("DEBUG: verificando inodo 0 justo antes de salir de format()");
+
             Inode verificacion = diskManager.readInode(0, superblock.inodeTableOffset, INODE_SIZE);
-            System.out.println("DEBUG: verificacion.type = " + verificacion.type);
             
-            superblock.print();
+            
+          //  superblock.print();
 
         } catch (IOException e) {
             System.out.println("Error al formatear el disco: " + e.getMessage());
@@ -156,7 +155,7 @@ public class FileSystem {
                 groupTable[i] = diskManager.readGroup(i, superblock.groupTableOffset, Group.GROUP_SIZE);
             }
             System.out.println("Grupos cargados: " + groupCount);
-            superblock.print();
+            //superblock.print();
 
             return true;
 

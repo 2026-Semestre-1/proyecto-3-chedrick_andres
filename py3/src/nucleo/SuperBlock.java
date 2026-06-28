@@ -12,12 +12,11 @@ import java.io.Serializable;
  */
 public class SuperBlock implements Serializable {
 
-    
 // Esto es lo de la firma de MBR
     public static final short MAGIC = (short) 0xAA55;
     public short magic;
-    public String filename ;  // nombre del archivo .fs "miDiscoDuro.fs"
-    
+    public String filename;  // nombre del archivo .fs "miDiscoDuro.fs"
+
     public String fsName;
     public long createdAt;
     public long lastMounted;
@@ -37,6 +36,7 @@ public class SuperBlock implements Serializable {
 
     //Los offsets de los .fs
     public long bitmapOffset;
+    public int bitmapMaxSize;   // ← NUEVO: se necesita guardar para usarlo al leer/escribir
     public long inodeTableOffset;
     public long dataBlocksOffset;
     public long userTableOffset;
@@ -46,12 +46,12 @@ public class SuperBlock implements Serializable {
     }
 
     public void init(String name, long diskSizeBytes, int blockSize, String fileName) {
-        
+
         this.magic = MAGIC;
         this.filename = fileName;
-        this.userCount  = 0;
+        this.userCount = 0;
         this.groupCount = 0;
-       
+
         this.fsName = name;
         this.createdAt = System.currentTimeMillis();
         this.lastMounted = System.currentTimeMillis();
@@ -61,10 +61,10 @@ public class SuperBlock implements Serializable {
         this.totalBlocks = (int) (diskSizeBytes / blockSize);
         this.maxInodes = totalBlocks / 10; //un 10% que seria un inodo por cada 10 bloques
 
-        this.freeBlocks  = totalBlocks;
-        this.usedBlocks  = 0;
-        this.freeInodes  = maxInodes;
-        this.usedInodes  = 0;
+        this.freeBlocks = totalBlocks;
+        this.usedBlocks = 0;
+        this.freeInodes = maxInodes;
+        this.usedInodes = 0;
 
         // Se calculan los offsets -> puro calculo mate
         // MBR ocupa el primer bloque
@@ -73,15 +73,12 @@ public class SuperBlock implements Serializable {
         // Superbloque ocupa el segundo bloque
         long sbEnd = mbrEnd + blockSize;
 
-        // el Bitmap va despu del superbloque
         this.bitmapOffset = sbEnd;
-        int bitmapMaxSize = 3000;
-
-        // la tabla de inodos va despues del bitmap
+        int bitmapRawSize = (totalBlocks / 8) + 1; // tamaño real necesario para los bits
+        this.bitmapMaxSize = bitmapRawSize + 500;    // margen para overhead de serialización de Java, AHORA SE GUARDA
         this.inodeTableOffset = bitmapOffset + bitmapMaxSize;
-
         // Bloques de datos van despues de la tabla de inodos
-        int inodeSize = 1024; 
+        int inodeSize = 1024;
         this.dataBlocksOffset = inodeTableOffset + ((long) maxInodes * inodeSize);
         this.userTableOffset = dataBlocksOffset + ((long) totalBlocks * blockSize);
         this.groupTableOffset = userTableOffset + ((long) User.MAX_USERS * User.USER_SIZE);
@@ -90,7 +87,7 @@ public class SuperBlock implements Serializable {
     public boolean isValid() {
         return this.magic == MAGIC;
     }
-    
+
     // Se llama cada vez que se asignan bloques (touch, mkdir, etc)
     public void blockUsed(int count) {
         usedBlocks += count;
@@ -136,5 +133,3 @@ public class SuperBlock implements Serializable {
         System.out.println("----------------------");
     }
 }
-
-

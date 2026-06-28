@@ -35,6 +35,10 @@ public class CommandFactory {
         comandos.put("addtogroup", new CommandAddToGroup(fs, state));
         comandos.put("viewFilesOpen", new CommandViewFilesOpen(fs, state));
         comandos.put("viewFCB", new CommandViewFCB(fs, state));
+        comandos.put("clear",  new ClearCommand());
+        comandos.put("infoFS", new InfoFSCommand(fs));
+        comandos.put("less",   new LessCommand(fs, state, scanner));
+        comandos.put("ln",     new LnCommand(fs, state));
     }
     
 

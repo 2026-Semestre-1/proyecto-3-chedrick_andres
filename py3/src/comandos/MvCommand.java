@@ -44,7 +44,7 @@ public class MvCommand implements Command {
         }
 
         // si el segundo argumento es un directorio existente - -  mover
-        int destDirId = fs.buscarInodePorNombre(segundoArg, dirActual);
+        int destDirId = fs.buscarInodePorRuta(segundoArg, dirActual);
         boolean esDirectorioDestino = destDirId != -1
                 && fs.inodeTable[destDirId].type.equals(Inode.DIR);
 

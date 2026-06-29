@@ -8,16 +8,22 @@ import java.util.Scanner;
 public class Py3 {
 
     public static void main(String[] args) throws ClassNotFoundException {
+        boolean isValid = false;
+        String[] partes = null;
         Scanner sc = new Scanner(System.in);
+        while(!isValid){
+            
+            System.out.println("Inserte un comando de ejecución:");
+            String lineaCompleta = sc.nextLine().trim();
 
-        System.out.println("Inserte un comando de ejecución:");
-        String lineaCompleta = sc.nextLine().trim();
+            partes = lineaCompleta.split("\\s+");
 
-        String[] partes = lineaCompleta.split("\\s+");
-
-        if (partes.length < 2 || !partes[0].equals("java") || !partes[1].equals("myFileSystem")) {
-            System.out.println("Error: comando inválido. Use: java myFileSystem [nombre_disco.fs]");
-            return;
+            if (partes.length < 2 || !partes[0].equals("java") || !partes[1].equals("myFileSystem")) {
+                System.out.println("Error: comando inválido. Use: java myFileSystem [nombre_disco.fs]");
+            }else{
+                isValid = true;
+            }
+            
         }
 
         String filename = null;

@@ -30,8 +30,8 @@ public class MkdirCommand implements Command {
 
         String name = args[1];
         int parentId = state.currentDirId;
-        int ownerId = 0;
-        int groupId = 0;
+        int ownerId = state.currentUserId;
+        int groupId = state.currentGroupId;
 
         try {
             if (fs.superblock.freeInodes <= 0) {
@@ -42,6 +42,10 @@ public class MkdirCommand implements Command {
             Inode parent = fs.inodeTable[parentId];
             if (parent == null || !parent.type.equals(Inode.DIR)) {
                 System.out.println("Error: el directorio padre no existe o no es válido");
+                return;
+            }
+            if (state.currentUserId != 0 && !parent.canWrite(state.currentUserId, state.currentGroupId)) {
+                System.out.println("Error: no tienes permisos para crear directorios aquí");
                 return;
             }
 

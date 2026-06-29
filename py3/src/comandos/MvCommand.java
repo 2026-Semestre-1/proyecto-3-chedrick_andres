@@ -37,9 +37,14 @@ public class MvCommand implements Command {
             System.out.println("Error: '" + name + "' no existe");
             return;
         }
+        Inode source = fs.inodeTable[sourceId];
+        if (state.currentUserId != 0 && !source.canWrite(state.currentUserId, state.currentGroupId)) {
+            System.out.println("Error: no tienes permisos para mover o renombrar '" + name + "'");
+            return;
+        }
 
         // si el segundo argumento es un directorio existente - -  mover
-        int destDirId = fs.buscarInodePorNombre(segundoArg, dirActual);
+        int destDirId = fs.buscarInodePorRuta(segundoArg, dirActual);
         boolean esDirectorioDestino = destDirId != -1
                 && fs.inodeTable[destDirId].type.equals(Inode.DIR);
 

@@ -1,1 +1,4 @@
-/py3/dist/
+*.class
+*.fs
+*.xml
+*.properties

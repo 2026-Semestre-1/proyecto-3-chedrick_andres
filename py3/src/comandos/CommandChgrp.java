@@ -27,13 +27,12 @@ public class CommandChgrp implements Command {
         }
 
         Inode inodeActualizado = null;
-        boolean asignado      = false;
+        boolean asignado = false;
         int newGroup;
         boolean inodeValido;
 
         switch (args.length) {
             case 3:
-
                 newGroup = -1;
                 for (Group group : fs.groupTable) {
                     if (group != null && group.groupName != null && group.groupName.equals(args[1])) {
@@ -46,17 +45,28 @@ public class CommandChgrp implements Command {
                     return;
                 }
 
+                String nombreFinal3 = extraerNombre(args[2]);
+                boolean esArchivo3  = esArchivo(nombreFinal3);
+
                 inodeValido = false;
-                for (Inode inodeTable : fs.inodeTable) {
-                    if (inodeTable != null && inodeTable.getFullName() != null && inodeTable.getFullName().equals(args[2])) {
-                        inodeActualizado = inodeTable;
-                        if (state.currentUserId == 0 || state.currentUserId == inodeTable.ownerId) {
+                for (Inode inode : fs.inodeTable) {
+                    if (inode != null && inode.name != null && inode.getFullName().equals(nombreFinal3)) {
+                        if (esArchivo3 && !inode.type.equals(Inode.FILE)) continue;
+                        if (!esArchivo3 && !inode.type.equals(Inode.DIR)) continue;
+
+                        inodeActualizado = inode;
+                        if (state.currentUserId == 0 || state.currentUserId == inode.ownerId) {
                             inodeValido = true;
-                            inodeTable.groupId = newGroup;
+                            inode.groupId = newGroup;
                             asignado = true;
                             break;
                         }
                     }
+                }
+
+                if (inodeActualizado == null) {
+                    System.out.println("Error: '" + nombreFinal3 + "' no existe");
+                    return;
                 }
 
                 if (!inodeValido) {
@@ -67,22 +77,21 @@ public class CommandChgrp implements Command {
                 if (asignado) {
                     try {
                         fs.diskManager.writeInode(inodeActualizado, fs.superblock.inodeTableOffset, FileSystem.INODE_SIZE);
-                        System.out.println("Éxito: el grupo de '" + args[2] + "' ahora es '" + args[1] + "'");
+                        System.out.println("Éxito: el grupo de '" + nombreFinal3 + "' ahora es '" + args[1] + "'");
                     } catch (IOException ex) {
                         System.out.println("Error al escribir en disco: " + ex.getMessage());
                     }
                     return;
                 }
-
-                System.out.println("Error: archivo/directorio '" + args[2] + "' inexistente");
                 break;
 
             case 4:
 
                 if (!args[1].equals("-R")) {
-                    System.out.println("Error uso: chgrp groupname filename / chgrp groupname directory / chgrp -R groupname directory");
+                    System.out.println("Error uso: chgrp -R groupname directory");
                     return;
                 }
+
                 newGroup = -1;
                 for (Group group : fs.groupTable) {
                     if (group != null && group.groupName != null && group.groupName.equals(args[2])) {
@@ -95,24 +104,31 @@ public class CommandChgrp implements Command {
                     return;
                 }
 
+                String nombreFinal4 = extraerNombre(args[3]);
+
+
+                if (esArchivo(nombreFinal4)) {
+                    System.out.println("Error: '-R' se usa con directorios, no con archivos");
+                    return;
+                }
+
                 inodeValido = false;
-                boolean esDir = false;
-                for (Inode inodeTable : fs.inodeTable) {
-                    if (inodeTable != null && inodeTable.getFullName() != null && inodeTable.getFullName().equals(args[3])) {
-                        if (inodeTable.type.equals(Inode.DIR)) {
-                            esDir = true;
-                            if (state.currentUserId == 0 || state.currentUserId == inodeTable.ownerId) {
-                                inodeActualizado = inodeTable;
-                                inodeValido = true;
-                                asignado    = true;
-                                break;
-                            }
+                for (Inode inode : fs.inodeTable) {
+                    if (inode != null && inode.name != null
+                            && inode.getFullName().equals(nombreFinal4)
+                            && inode.type.equals(Inode.DIR)) {
+
+                        inodeActualizado = inode;
+                        if (state.currentUserId == 0 || state.currentUserId == inode.ownerId) {
+                            inodeValido = true;
+                            asignado = true;
+                            break;
                         }
                     }
                 }
 
-                if (!esDir) {
-                    System.out.println("Error: '" + args[3] + "' no es un directorio, use chgrp sin -R");
+                if (inodeActualizado == null) {
+                    System.out.println("Error: directorio '" + nombreFinal4 + "' no existe");
                     return;
                 }
 
@@ -122,15 +138,21 @@ public class CommandChgrp implements Command {
                 }
 
                 cambiarGrupoRecursivo(inodeActualizado, newGroup);
-
-                if (asignado) {
-                    System.out.println("Éxito: el grupo de '" + args[3] + "' y su contenido ahora es '" + args[2] + "'");
-                    return;
-                }
-
-                System.out.println("Error: directorio '" + args[3] + "' inexistente");
+                System.out.println("Éxito: el grupo de '" + nombreFinal4 + "' y su contenido ahora es '" + args[2] + "'");
                 break;
         }
+    }
+
+
+    private String extraerNombre(String path) {
+        if (path.contains("/")) {
+            return path.substring(path.lastIndexOf("/") + 1);
+        }
+        return path;
+    }
+
+    private boolean esArchivo(String nombre) {
+        return nombre.contains(".");
     }
 
     private void cambiarGrupoRecursivo(Inode inode, int newGroup) {
@@ -141,7 +163,6 @@ public class CommandChgrp implements Command {
             System.out.println("Error al escribir en disco: " + ex.getMessage());
             return;
         }
-
         if (inode.type.equals(Inode.DIR)) {
             for (int i = 0; i < inode.childCount; i++) {
                 Inode hijo = fs.inodeTable[inode.children[i]];

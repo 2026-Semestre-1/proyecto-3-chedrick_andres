@@ -16,124 +16,155 @@ import nucleo.User;
 public class CommandChown implements Command {
     public FileSystem fs;
     public ShellState state;
-    
-    public CommandChown(FileSystem fs, ShellState state){
+
+    public CommandChown(FileSystem fs, ShellState state) {
         this.fs = fs;
         this.state = state;
     }
 
     @Override
     public void execute(String[] args) {
-        if (args.length < 3 || args.length > 4 ){
+        if (args.length < 3 || args.length > 4) {
             System.out.println("Error uso: chown username filename / chown username directory / chown -R username directory");
             return;
         }
+
         Inode inodeActualizado = null;
         boolean asignado = false;
         int newOwner;
-        boolean directorioValido;
-        switch(args.length){
+        boolean inodeValido;
+
+        switch (args.length) {
             case 3:
                 newOwner = -1;
-                for(User user : fs.userTable){
-                    if (user != null && user.username != null && user.username.equals(args[1])){
+                for (User user : fs.userTable) {
+                    if (user != null && user.username != null && user.username.equals(args[1])) {
                         newOwner = user.userId;
                         break;
                     }
                 }
-                if(newOwner == -1){
-                    System.out.println("Error: El usuario ingresado no existe");
+                if (newOwner == -1) {
+                    System.out.println("Error: el usuario '" + args[1] + "' no existe");
                     return;
                 }
-                directorioValido = false;
-                System.out.println(state.currentUserId);
-                for (Inode inodeTable : fs.inodeTable) {
-                    if(inodeTable != null && inodeTable.name != null){
-                        if(inodeTable.getFullName().equals(args[2])){
-                            inodeActualizado = inodeTable;
-                            System.out.println(inodeTable.ownerId);
-                            if(state.currentUserId == 0 || state.currentUserId == inodeTable.ownerId){
-                                
-                                System.out.println("Si es valido el usuario");
-                                directorioValido = true;
-                                inodeTable.ownerId = newOwner;
-                                asignado = true;
-                                break;
-                            }
+
+                String nombreFinal3 = extraerNombre(args[2]);
+                boolean esArchivo3  = esArchivo(nombreFinal3);
+
+                inodeValido = false;
+                for (Inode inode : fs.inodeTable) {
+                    if (inode != null && inode.name != null && inode.getFullName().equals(nombreFinal3)) {
+
+                        if (esArchivo3 && !inode.type.equals(Inode.FILE)) continue;
+                        if (!esArchivo3 && !inode.type.equals(Inode.DIR)) continue;
+
+                        inodeActualizado = inode;
+                        if (state.currentUserId == 0 || state.currentUserId == inode.ownerId) {
+                            inodeValido = true;
+                            inode.ownerId = newOwner;
+                            asignado = true;
+                            break;
                         }
                     }
                 }
-                if(!directorioValido){
-                    System.out.println("Error: Sólo el usuario root o el dueño del archivo/directorio puede cambiar al dueño");
+
+                if (!inodeValido && inodeActualizado == null) {
+                    System.out.println("Error: '" + nombreFinal3 + "' no existe");
                     return;
                 }
-                if (asignado){
+
+                if (!inodeValido) {
+                    System.out.println("Error: solo root o el dueño puede cambiar el propietario");
+                    return;
+                }
+
+                if (asignado) {
                     try {
                         fs.diskManager.writeInode(inodeActualizado, fs.superblock.inodeTableOffset, FileSystem.INODE_SIZE);
+                        System.out.println("Éxito: El usuario '" + args[1] + "' es el nuevo dueño de '" + nombreFinal3 + "'");
                     } catch (IOException ex) {
-                        System.out.println("Erro al escribir en disco: " + ex.getMessage());
+                        System.out.println("Error al escribir en disco: " + ex.getMessage());
                     }
-                        System.out.println("Éxito: El usuario "+ args[1] + " es el nuevo dueño de "+ args[2]);
-                        return;
-                }
-                System.out.println("Archivo/directorio "+ args[2] +" inexistente...");
-                break;
-            case 4:
-                if(!args[1].equals("-R")){
-                    System.out.println("Error uso: chown username filename / chown username directory / chown -R username directory");
                     return;
                 }
+                break;
+
+            case 4:
+
+                if (!args[1].equals("-R")) {
+                    System.out.println("Error uso: chown -R username directory");
+                    return;
+                }
+
                 newOwner = -1;
-                for(User user : fs.userTable){
-                    if (user != null && user.username != null && user.username.equals(args[2])){
+                for (User user : fs.userTable) {
+                    if (user != null && user.username != null && user.username.equals(args[2])) {
                         newOwner = user.userId;
                         break;
                     }
                 }
-                if(newOwner == -1){
-                    System.out.println("Error: El usuario ingresado no existe");
+                if (newOwner == -1) {
+                    System.out.println("Error: el usuario '" + args[2] + "' no existe");
                     return;
                 }
-                
-                directorioValido = false;
-                boolean esDir = false;
-                for (Inode inodeTable : fs.inodeTable) {
-                    if(inodeTable != null && inodeTable.name != null){
-                        if(inodeTable.getFullName().equals(args[3]) && (inodeTable.type == null ? Inode.DIR == null : inodeTable.type.equals(Inode.DIR))){
-                            esDir = true;
-                            if(state.currentUserId == 0 || state.currentUserId == inodeTable.ownerId){
-                                inodeActualizado = inodeTable;
-                                directorioValido = true;
-                                asignado = true;
-                                break;
-                            }
+
+                String nombreFinal4 = extraerNombre(args[3]);
+
+
+                if (esArchivo(nombreFinal4)) {
+                    System.out.println("Error: '-R' se usa con directorios, no con archivos");
+                    return;
+                }
+
+                inodeValido = false;
+                for (Inode inode : fs.inodeTable) {
+                    if (inode != null && inode.name != null
+                            && inode.getFullName().equals(nombreFinal4)
+                            && inode.type.equals(Inode.DIR)) {
+
+                        inodeActualizado = inode;
+                        if (state.currentUserId == 0 || state.currentUserId == inode.ownerId) {
+                            inodeValido = true;
+                            asignado = true;
+                            break;
                         }
                     }
                 }
-                if(!directorioValido){
-                    System.out.println("Error: Sólo el usuario root o el dueño del archivo/directorio puede cambiar al dueño");
+
+                if (inodeActualizado == null) {
+                    System.out.println("Error: directorio '" + nombreFinal4 + "' no existe");
                     return;
                 }
-                if(!esDir){
-                    System.out.println("Error '-R' se usa con directorios");
+
+                if (!inodeValido) {
+                    System.out.println("Error: solo root o el dueño puede cambiar el propietario");
                     return;
                 }
+
                 cambiarRecursivo(inodeActualizado, newOwner);
-                if (asignado){
-                    System.out.println("Éxito: El usuario "+ args[2] + " es el nuevo dueño de "+ args[3]);
-                    return;
-                }
-                System.out.println("Archivo/directorio "+ args[3] +" inexistente...");
+                System.out.println("Éxito: '" + args[2] + "' es el nuevo dueño de '" + nombreFinal4 + "' y su contenido");
                 break;
-            }
         }
-        
-    private void cambiarRecursivo(Inode inode, int newOwner){
+    }
+
+
+    private String extraerNombre(String path) {
+        if (path.contains("/")) {
+            return path.substring(path.lastIndexOf("/") + 1);
+        }
+        return path;
+    }
+
+    private boolean esArchivo(String nombre) {
+        return nombre.contains(".");
+    }
+
+    private void cambiarRecursivo(Inode inode, int newOwner) {
         inode.ownerId = newOwner;
         try {
             fs.diskManager.writeInode(inode, fs.superblock.inodeTableOffset, FileSystem.INODE_SIZE);
         } catch (IOException ex) {
-            System.out.println("Erro al escribir en disco: " + ex.getMessage());
+            System.out.println("Error al escribir en disco: " + ex.getMessage());
             return;
         }
         if (inode.type.equals(Inode.DIR)) {
@@ -145,6 +176,4 @@ public class CommandChown implements Command {
             }
         }
     }
-    
-        
 }

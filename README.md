@@ -7,3 +7,4 @@
 ### La escala del proyecto es un 4.5 de 5, se implementaron todos los comandos y funcionan de forma correccta, además, la planificación del proyecto y la estructura interna de las diferentes clases solicitadas cumplen con estándares para poder hacerlo crecer en el futuro si fuese requerido. De haber implementado los extras sería una puntuación 5 de 5
 
 ### Enlace del video: (Si esto fue solicitado)
+https://youtu.be/V8YwmYB1k8A

@@ -180,4 +180,30 @@ public class FileSystem {
         }
         return -1;
     }
+    public int buscarInodePorRuta(String ruta, int dirIdActual) {
+
+        // Si no tiene "/" es un nombre simple
+        if (!ruta.contains("/")) {
+            return buscarInodePorNombre(ruta, dirIdActual);
+        }
+
+        // Si empieza con "/" arrancamos desde la raíz (inodo 0)
+        int dirActual = ruta.startsWith("/") ? 0 : dirIdActual;
+
+        // Separar el path en partes
+        String[] partes = ruta.split("/");
+
+        for (String parte : partes) {
+            if (parte.isEmpty()) continue; // ignora el "/" inicial o dobles //
+
+            int encontrado = buscarInodePorNombre(parte, dirActual);
+            if (encontrado == -1) return -1; // alguna parte no existe
+
+            // Si no es la última parte, debe ser directorio para seguir navegando
+            Inode inode = inodeTable[encontrado];
+            dirActual = encontrado;
+        }
+
+        return dirActual;
+    }
 }

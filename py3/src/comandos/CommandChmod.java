@@ -39,11 +39,15 @@ public class CommandChmod implements Command {
             return;
         }
         Inode inodeActualizado = null;
+        String nombreFinal = extraerNombre(args[2]);
+        boolean esArchivo  = esArchivo(nombreFinal);
         boolean directorioValido = false;
         for (Inode inodeTable : fs.inodeTable) {
             if(inodeTable != null && inodeTable.getFullName() != null){
                 if(inodeTable.getFullName().equals(args[2])){
                     inodeActualizado = inodeTable;
+                    if (esArchivo && !inodeTable.type.equals(Inode.FILE)) continue;
+                    if (!esArchivo && !inodeTable.type.equals(Inode.DIR)) continue;
                     if(state.currentUserId == 0 || state.currentUserId == inodeTable.ownerId){
                         directorioValido = true;
                         break;
@@ -70,6 +74,16 @@ public class CommandChmod implements Command {
         }
         
         
+    }
+    private String extraerNombre(String path) {
+        if (path.contains("/")) {
+            return path.substring(path.lastIndexOf("/") + 1);
+        }
+        return path;
+    }
+
+    private boolean esArchivo(String nombre) {
+        return nombre.contains(".");
     }
     
     

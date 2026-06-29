@@ -124,7 +124,8 @@ public class FileSystem {
             diskManager = new DiskManager(filename);
             diskManager.openDisk();
 
-            superblock = diskManager.readSuperBlock(2048);
+            
+            superblock = diskManager.readSuperBlock(4096); 
 
             if (!superblock.isValid()) {
                 System.out.println("Error: '" + filename + "' no es un disco válido (firma incorrecta)");

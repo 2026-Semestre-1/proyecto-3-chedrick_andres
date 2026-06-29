@@ -68,6 +68,11 @@ public class Py3 {
                     System.out.println("Error: el tamaño del disco y del bloque deben ser mayores a 0.");
                     continue;
                 }
+                
+                if (diskMB >= 100 || blockSize >= 1000) {
+                    System.out.println("Error: el tamaño del disco y del bloque deben ser menores a lo ingresado.");
+                    continue;
+                }
 
                 String nombreDisco = partesFormat[3];
 
